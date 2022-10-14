@@ -1,0 +1,78 @@
+#+ summary: "Retrieve all Observations"
+#+ description: "NOTE: make sure response content type is application/json"
+#+ endpoint: "https://www.foodie-cloud.org/sparql?default-graph-uri=http://w3id.org/iliad/dataaset/jf-pilot-sample"
+#+ tags: [ "json" ]
+#+ method: "GET"
+#+ pagination: 100
+#+ transform: {
+#+   "description": "?info",
+#+   "$anchor": "description",
+#+   "@iot.count": "?total",
+#+   "@iot.nextLink": "?next_link",
+#+   "value": {
+#+     "@iot.id": "?id",
+#+     "@iot.selfLink": "?id_link",
+#+     "description": "?desc_info",
+#+     "observationType": "?obs_type",
+#+     "unitOfMeasurement": {
+#+       "symbol": "?unit_symbol",
+#+       "name": "?unit_name",
+#+       "definition": "?unit_definition",
+#+     },
+#+     "Observations@iot.navigationLink": "?obs_link",
+#+     "ObservedProperty@iot.navigationLink": "?op_link",
+#+     "Sensor@iot.navigationLink": "?sensor_link",
+#+     "Thing@iot.navigationLink": "?thing_link",
+#+   }
+#+ }
+
+PREFIX iliad-api: <https://w3id.org/iliad/api>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX dct: <http://purl.org/dc/terms/>
+PREFIX dcat: <http://www.w3.org/ns/dcat#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX sosa:  <http://www.w3.org/ns/sosa/>
+PREFIX oim-jf:  <http://w3id.org/iliad/oim/jellyfish#> 
+PREFIX dwc: <http://rs.tdwg.org/dwc/terms/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX bif: <bif:>
+
+
+SELECT DISTINCT ?info ?obs_property ?sensor ?total ?id ?id_link ?obs_link ?op_link ?sensor_link ?thing_link ?obs_type ?desc_info ?unit_definition ?unit_symbol ?unit_name ?next_link
+WHERE {
+    ?col a sosa:ObservationCollection ;
+        sosa:observedProperty ?obs_property ;
+        sosa:madeBySensor ?sensor ;
+        sosa:hasMember ?s .
+    ?s a sosa:Observation .
+    BIND ("OGC SensorThings API - Datastreams" as ?info)
+    BIND (REPLACE(STR(?obs_property), "^.*/([^/]*)$", "$1") as ?prop_id)
+    BIND (REPLACE(STR(?sensor), "^.*/([^/]*)$", "$1") as ?sensor_id)
+    BIND (CONCAT(?sensor_id,"-",?prop_id) as ?id)
+    BIND (CONCAT("The datastream of jellyFish Abundance by user sensor: ",?sensor_id, " for observed property: ",?prop_id) as ?desc_info)
+    BIND (URI("http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_ComplexObservation") AS ?obs_type)
+    BIND (URI("http://qudt.org/2.1/vocab/unit") AS ?unit_definition)
+    BIND (URI("U") AS ?unit_symbol)
+    BIND (URI("Unitless") AS ?unit_name)
+    BIND (URI(CONCAT('https://w3id.org/iliad/api/v1.0/Datastreams(', ?id,')')) AS ?id_link)
+    BIND (URI(CONCAT('https://w3id.org/iliad/api/v1.0/Datastreams(', ?id,')/Observations')) AS ?obs_link)
+    BIND (URI(CONCAT('https://w3id.org/iliad/api/v1.0/Datastreams(', ?id,')/ObservedProperty')) AS ?op_link)
+    BIND (URI(CONCAT('https://w3id.org/iliad/api/v1.0/Datastreams(', ?id,')/Sensor')) AS ?sensor_link)
+    BIND (URI(CONCAT('https://w3id.org/iliad/api/v1.0/Datastreams(', ?id,')/Thing')) AS ?thing_link)
+    {
+        SELECT (count(*) as ?total) 
+        WHERE { 
+            SELECT DISTINCT ?sensor ?obs_property
+            WHERE{
+                ?col a sosa:ObservationCollection ;
+                sosa:observedProperty ?obs_property ;
+                sosa:madeBySensor ?sensor .
+            }  
+        }
+    }
+    OPTIONAL { ?s ?p ?_page } 
+    BIND (URI(CONCAT('https://w3id.org/iliad/api/v1.0/Datastreams?$top=100&$skip=', (xsd:integer(?_page)+1)*100)) AS ?next_link)
+} GROUP BY ?sensor ?obs_property
+
+

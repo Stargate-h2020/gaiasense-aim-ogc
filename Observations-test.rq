@@ -1,0 +1,63 @@
+#+ summary: "Retrieve all Observations"
+#+ description: "NOTE: make sure response content type is application/json"
+#+ endpoint: "https://www.foodie-cloud.org/sparql?default-graph-uri=http://w3id.org/iliad/dataaset/jf-pilot-sample"
+#+ tags: [ "test" ]
+#+ method: "GET"
+#+ transform: {
+#+   "description": "?info",
+#+   "$anchor": "description",
+#+   "@iot.count": "?total",
+#+   "@iot.nextLink": "?next_link",
+#+   "value": {
+#+     "@iot.id": "?id",
+#+     "@iot.selfLink": "?id_link",
+#+     "phenomenonTime": "?phenomenonTime",
+#+     "resultTime": "?resultTime",
+#+     "result": {
+#+        "densityOfJF": "?densityOfJF",
+#+        "sampleSizeValue": "?sampleSizeValue",
+#+        "speciesScientificName": "?scientificName",
+#+        "wormsConcept": "?wormsConcept",
+#+     },
+#+     "Datastream@iot.navigationLink": "?datastream_link",
+#+     "FeatureOfInterest@iot.navigationLink": "?feature_link",
+#+   }
+#+ }
+
+PREFIX iliad-api: <https://w3id.org/iliad/api>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX dct: <http://purl.org/dc/terms/>
+PREFIX dcat: <http://www.w3.org/ns/dcat#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX sosa:  <http://www.w3.org/ns/sosa/>
+PREFIX oim-jf:  <http://w3id.org/iliad/oim/jellyfish#> 
+PREFIX dwc: <http://rs.tdwg.org/dwc/terms/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX bif: <bif:>
+
+SELECT DISTINCT ?info ?id ?id_link ?resultTime ?phenomenonTime ?densityOfJF ?sampleSizeValue ?scientificName ?wormsConcept ?datastream_link ?feature_link ?total ?next_link
+WHERE {
+    ?s a sosa:Observation ;
+    	sosa:resultTime ?resultTime ;
+			sosa:phenomenonTime ?phenomenonTime ;
+			sosa:hasResult ?result .
+    ?result oim-jf:densityOfJF ?densityOfJF ;
+			dwc:sampleSizeValue ?sampleSizeValue ;
+			dwc:scientificName ?scientificName ;
+			oim-jf:wormsConcept ?wormsConcept .
+		BIND ("OGC SensorThings API - Observations" as ?info)	  
+    BIND (REPLACE(STR(?s), "^.*/([^/]*)$", "$1") as ?id)
+    BIND (URI(CONCAT('https://w3id.org/iliad/api/v1.0/Observations(', ?id,')')) AS ?id_link)
+    BIND (URI(CONCAT('https://w3id.org/iliad/api/v1.0/Observations(', ?id,')/Datastream')) AS ?datastream_link)
+    BIND (URI(CONCAT('https://w3id.org/iliad/api/v1.0/Observations(', ?id,')/FeautureOfInterest')) AS ?feature_link)
+    {
+       SELECT (count(*) as ?total) WHERE { ?x a sosa:Observation }
+
+    }
+    OPTIONAL { ?s ?p ?_page } 
+    BIND (URI(CONCAT('https://w3id.org/iliad/api/v1.0/Observations?$top=100&$skip=', xsd:integer(?_page)*100)) AS ?next_link)
+    OPTIONAL { ?s ?p ?_top }
+    OPTIONAL { ?s ?p ?_skip }
+}
+ORDER BY ?s LIMIT ?_top OFFSET ?_skip
