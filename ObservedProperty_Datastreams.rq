@@ -35,7 +35,7 @@ PREFIX sosa:  <http://www.w3.org/ns/sosa/>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 
 
-SELECT DISTINCT ?info ?obs_property ?sensor ?total ?id_link ?obs_link ?op_link ?sensor_link ?thing_link ?obs_type ?desc_info ?unit_definition ?unit_symbol ?unit_name ?next_link ?name ?id
+SELECT DISTINCT ?info ?obs_property ?sensor ?total ?id_link ?obs_link ?op_link ?sensor_link ?thing_link ?obs_type ?desc_info ?unit_definition ?unit_symbol ?unit_name ?next_link ?name ?id ?_obp
 WHERE {
     ?col a sosa:ObservationCollection ;
         sosa:observedProperty ?obs_property ;
@@ -45,6 +45,7 @@ WHERE {
     BIND ("OGC SensorThings API - Datastreams" as ?info)
     BIND (STRAFTER(STR(?sensor), "sensor/") AS ?sensor_raw)
     BIND (STRAFTER(STR(?obs_property), "property/") AS ?obs_property_raw)
+    FILTER (?obs_property_raw=?_obp)
     BIND (CONCAT(?sensor_raw, "-", ?obs_property_raw) AS ?id)
     BIND (CONCAT("The datastream of jellyFish Abundance by user sensor: ",?sensor_raw, " for observed property: ",?obs_property_raw) AS ?desc_info)
     BIND (CONCAT(?sensor_raw, ':', ?obs_property_raw) AS ?name)
@@ -60,11 +61,13 @@ WHERE {
     {
         SELECT (count(*) as ?total) 
         WHERE { 
-            SELECT DISTINCT ?sensor ?obs_property
+            SELECT DISTINCT ?sensor2 ?obs_property2
             WHERE{
                 ?col a sosa:ObservationCollection ;
-                sosa:observedProperty ?obs_property ;
-                sosa:madeBySensor ?sensor .
+                sosa:observedProperty ?obs_property2 ;
+                sosa:madeBySensor ?sensor2 .
+                BIND (STRAFTER(STR(?obs_property2), "property/") AS ?obs_property_raw2)
+                FILTER (?obs_property_raw2=?_obp)
             }  
         }
     }

@@ -1,9 +1,11 @@
-#+ summary: "Retrieve all Observations"
+#+ summary: "Retrieves all the information about ILIAD Observations for a specific Datastream"
 #+ description: "NOTE: make sure response content type is application/json"
 #+ endpoint: "https://www.foodie-cloud.org/sparql?default-graph-uri=http://w3id.org/iliad/dataaset/jf-pilot-sample"
-#+ tags: [ "json" ]
-#+ method: "GET"
+#+ tags:
+#+   - json
+#+ method: GET
 #+ pagination: 100
+#+ endpoint_in_url: False
 #+ transform: {
 #+   "description": "?info",
 #+   "$anchor": "description",
@@ -30,15 +32,10 @@
 
 PREFIX iliad-api: <https://w3id.org/iliad/api>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-PREFIX dct: <http://purl.org/dc/terms/>
-PREFIX dcat: <http://www.w3.org/ns/dcat#>
-PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 PREFIX sosa:  <http://www.w3.org/ns/sosa/>
 PREFIX oim-jf:  <http://w3id.org/iliad/oim/jellyfish#> 
 PREFIX dwc: <http://rs.tdwg.org/dwc/terms/>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
-PREFIX bif: <bif:>
 
 SELECT DISTINCT ?info ?id ?id_link ?resultTime ?phenomenonTime ?densityOfJF ?quantityOfJF ?sampleSizeValue ?scientificName ?wormsConcept ?stingByJF ?beachedJF ?datastream_link ?feature_link ?total ?next_link
 WHERE {
@@ -59,7 +56,7 @@ WHERE {
         oim-jf:stingByJF ?stingByJF ;
 	      oim-jf:beachedJF ?beachedJF .
     }
-		BIND ("OGC SensorThings API - Observations" as ?info)	  
+	BIND ("OGC SensorThings API - Observations" as ?info)	  
     BIND (REPLACE(STR(?s), "^.*/([^/]*)$", "$1") as ?id)
     BIND (REPLACE(STR(?sensor_URI), "^.*/([^/]*)$", "$1") as ?sensor)
     BIND (REPLACE(STR(?property_URI), "^.*/([^/]*)$", "$1") as ?property)

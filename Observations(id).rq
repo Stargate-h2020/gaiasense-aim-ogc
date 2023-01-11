@@ -1,9 +1,10 @@
-#+ summary: "Retrieve a specific Observation"
+#+ summary: "Retrieves all the information about specific ILIAD Observations"
 #+ description: "NOTE: make sure response content type is application/json"
 #+ endpoint: "https://www.foodie-cloud.org/sparql?default-graph-uri=http://w3id.org/iliad/dataaset/jf-pilot-sample"
-#+ tags: [ "json" ]
-#+ method: "GET"
-#+ pagination: 100
+#+ tags:
+#+   - json
+#+ method: GET
+#+ endpoint_in_url: False
 #+ transform: {
 #+   "@iot.id": "?id",
 #+   "$anchor": "@iot.id",
@@ -25,14 +26,10 @@
 
 PREFIX iliad-api: <https://w3id.org/iliad/api>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-PREFIX dct: <http://purl.org/dc/terms/>
-PREFIX dcat: <http://www.w3.org/ns/dcat#>
-PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 PREFIX sosa:  <http://www.w3.org/ns/sosa/>
 PREFIX oim-jf:  <http://w3id.org/iliad/oim/jellyfish#> 
 PREFIX dwc: <http://rs.tdwg.org/dwc/terms/>
-PREFIX bif: <bif:>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 
 SELECT DISTINCT ?s ?id ?id_link ?resultTime ?phenomenonTime ?densityOfJF ?quantityOfJF ?sampleSizeValue ?scientificName ?wormsConcept ?stingByJF ?beachedJF ?datastream_link ?feature_link
 WHERE {
@@ -42,6 +39,7 @@ WHERE {
         sosa:hasMember ?s .
     ?s a sosa:Observation ;
 		sosa:hasResult ?result .
+		OPTIONAL {
     ?result oim-jf:densityOfJF ?densityOfJF ;
         oim-jf:quantityOfJF ?quantityOfJF ; 
 		dwc:sampleSizeValue ?sampleSizeValue ;
@@ -49,9 +47,10 @@ WHERE {
 		oim-jf:wormsConcept ?wormsConcept ;
         oim-jf:stingByJF ?stingByJF ;
 	    oim-jf:beachedJF ?beachedJF .
+	  }
     FILTER (strEnds(STR(?s), CONCAT('/',?_id)))	
     BIND (REPLACE(STR(?s), "^.*/([^/]*)$", "$1") as ?id)
     BIND (URI(CONCAT('https://w3id.org/iliad/api/v1.0/Observations(', ?_id,')')) AS ?id_link)
     BIND (URI(CONCAT('https://w3id.org/iliad/api/v1.0/Observations(', ?_id,')/Datastream')) AS ?datastream_link)
-    BIND (URI(CONCAT('https://w3id.org/iliad/api/v1.0/Observations(', ?_id,')/FeautureOfInterest')) AS ?feature_link)
+    BIND (URI(CONCAT('https://w3id.org/iliad/api/v1.0/Observations(', ?_id,')/FeatureOfInterest')) AS ?feature_link)
 }

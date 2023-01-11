@@ -31,11 +31,13 @@ PREFIX geo: <http://www.opengis.net/ont/geosparql#>
 PREFIX oim-jf:  <http://w3id.org/iliad/oim/jellyfish#>
 
 
-SELECT ?time ?info ?location ?total ?things_link ?locations_link ?id_link
+SELECT ?time ?info ?location ?total ?things_link ?locations_link ?id_link ?_thing
 WHERE {
     ?s a sosa:ObservationCollection ;
         sosa:madeBySensor ?sens ;
         sosa:resultTime ?res .
+    BIND (URI(CONCAT('http://w3id.org/iliad/jellyfish/sensor/', ?_thing)) AS ?thing_uri)
+    FILTER (?sens=?thing_uri)
     BIND ("OGC SensorThings API - HistoricalLocations" AS ?info)
     BIND (xsd:dateTime(?res) AS ?time)
     BIND (STRAFTER(STR(?s), '/observation/') AS ?obs_id)
@@ -45,7 +47,14 @@ WHERE {
     BIND (URI(CONCAT('https://w3id.org/iliad/api/v1.0/HistoricalLocations(', ?location,')/Things')) AS ?things_link)
     BIND (URI(CONCAT('https://w3id.org/iliad/api/v1.0/HistoricalLocations(', ?location,')/Locations')) AS ?locations_link)
             {
-        SELECT (count(*) as ?total) WHERE { ?x a sosa:ObservationCollection }
+        SELECT (count(*) as ?total) WHERE {
+            SELECT DISTINCT ?x
+            WHERE {
+                ?x a sosa:ObservationCollection ;
+                    sosa:madeBySensor ?sens2 .
+                BIND (URI(CONCAT('http://w3id.org/iliad/jellyfish/sensor/', ?_thing)) AS ?thing_uri2)
+                FILTER (?sens2=?thing_uri2)
+            } }
 
     }
     OPTIONAL { ?s ?p ?_page_integer } 

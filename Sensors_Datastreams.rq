@@ -35,13 +35,15 @@ PREFIX sosa:  <http://www.w3.org/ns/sosa/>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 
 
-SELECT DISTINCT ?info ?obs_property ?sensor ?total ?id_link ?obs_link ?op_link ?sensor_link ?thing_link ?obs_type ?desc_info ?unit_definition ?unit_symbol ?unit_name ?next_link ?name ?id
+SELECT DISTINCT ?info ?obs_property ?sensor ?total ?id_link ?obs_link ?op_link ?sensor_link ?thing_link ?obs_type ?desc_info ?unit_definition ?unit_symbol ?unit_name ?next_link ?name ?id ?_sens
 WHERE {
     ?col a sosa:ObservationCollection ;
         sosa:observedProperty ?obs_property ;
         sosa:madeBySensor ?sensor ;
         sosa:hasMember ?s .
     ?s a sosa:Observation .
+    BIND (URI(CONCAT('http://w3id.org/iliad/jellyfish/sensor/', ?_sens)) AS ?sensor_uri)
+    FILTER (?sensor = ?sensor_uri)
     BIND ("OGC SensorThings API - Datastreams" as ?info)
     BIND (STRAFTER(STR(?sensor), "sensor/") AS ?sensor_raw)
     BIND (STRAFTER(STR(?obs_property), "property/") AS ?obs_property_raw)
@@ -64,7 +66,7 @@ WHERE {
             WHERE{
                 ?col a sosa:ObservationCollection ;
                 sosa:observedProperty ?obs_property ;
-                sosa:madeBySensor ?sensor .
+                sosa:madeBySensor ?sensor_uri .
             }  
         }
     }

@@ -1,4 +1,4 @@
-#+ summary: "Retrieves all the information about ILIAD Observations"
+#+ summary: "Retrieves all the information about ILIAD Observations for a specific FeatureOfInterest"
 #+ description: "NOTE: make sure response content type is application/json"
 #+ endpoint: "https://www.foodie-cloud.org/sparql?default-graph-uri=http://w3id.org/iliad/dataaset/jf-pilot-sample"
 #+ tags:
@@ -42,6 +42,7 @@ WHERE {
     ?col a sosa:ObservationCollection ;
       sosa:resultTime ?resultTime ;
 			sosa:phenomenonTime ?phenomenonTime ; 
+      sosa:hasFeatureOfInterest ?foi_URI ;
       sosa:hasMember ?s .
     ?s a sosa:Observation ;
 			sosa:hasResult ?result .
@@ -54,16 +55,27 @@ WHERE {
         oim-jf:stingByJF ?stingByJF ;
 	      oim-jf:beachedJF ?beachedJF .
     }
-		BIND ("OGC SensorThings API - Observations" as ?info)	  
+	BIND ("OGC SensorThings API - Observations" as ?info)	  
     BIND (REPLACE(STR(?s), "^.*/([^/]*)$", "$1") as ?id)
+    BIND (REPLACE(STR(?foi_URI), "^.*/([^/]*)$", "$1") as ?foi)
+    OPTIONAL { ?s ?p ?_foi }
+    FILTER (?foi= ?_foi)
     BIND (URI(CONCAT('https://w3id.org/iliad/api/v1.0/Observations(', ?id,')')) AS ?id_link)
     BIND (URI(CONCAT('https://w3id.org/iliad/api/v1.0/Observations(', ?id,')/Datastream')) AS ?datastream_link)
-    BIND (URI(CONCAT('https://w3id.org/iliad/api/v1.0/Observations(', ?id,')/FeatureOfInterest')) AS ?feature_link)
+    BIND (URI(CONCAT('https://w3id.org/iliad/api/v1.0/Observations(', ?id,')/FeautureOfInterest')) AS ?feature_link)
     {
-       SELECT (count(*) as ?total) WHERE { ?x a sosa:Observation }
-
+       SELECT (count(*) as ?total) 
+       WHERE { 
+        ?col a sosa:ObservationCollection ;
+          sosa:hasFeatureOfInterest ?foi_URI ;
+          sosa:hasMember ?s .
+        ?s a sosa:Observation ;
+			    sosa:hasResult ?result .
+        BIND (REPLACE(STR(?foi_URI), "^.*/([^/]*)$", "$1") as ?foi2)
+        OPTIONAL { ?s ?p ?_foi }
+        FILTER (?foi2= ?_foi)
+      }
     }
     OPTIONAL { ?s ?p ?_page } 
-    BIND (URI(CONCAT('https://w3id.org/iliad/api/v1.0/Observations?$top=100&$skip=', (xsd:integer(?_page)+1)*100)) AS ?next_link)
+    BIND (URI(CONCAT('https://w3id.org/iliad/api/v1.0/Datastreams(',?sensor,'-',?property,')/Observations?$top=100&$skip=', (xsd:integer(?_page)+1)*100)) AS ?next_link)
 }
-ORDER BY ?id

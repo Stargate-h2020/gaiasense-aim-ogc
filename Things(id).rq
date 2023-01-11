@@ -1,29 +1,22 @@
-#+ summary: Retrieves all the information about ILIAD Things
+#+ summary: Retrieves all the information about specific ILIAD Thing
 #+ description: NOTE! make sure response content type is application/json
 #+ endpoint: https://www.foodie-cloud.org/sparql?default-graph-uri=http://w3id.org/iliad/dataaset/jf-pilot-sample
 #+ tags:
 #+   - json
 #+ method: GET
-#+ pagination: 100
 #+ endpoint_in_url: False
 #+ transform: {
-#+   "description": "?info",
-#+   "$anchor": "description",
-#+   "@iot.count": "?total",
-#+   "@iot.nextLink": "?next_link",
-#+   "value": {
-#+     "@iot.id": "?id",
-#+     "@iot.selfLink": "?id_link",
-#+     "description": "?desc",
-#+     "name": "?name",
-#+     "properties": {
-#+       "type": "?sensor_type",
-#+       "agentConfidence": "?conf",
-#+       },
-#+     "Datastreams@iot.navigationLink": "?ds_link",
-#+     "HistoricalLocations@iot.navigationLink": "?hl_link",
-#+     "Locations@iot.navigationLink": "?locations_link",
+#+   "@iot.id": "?id",
+#+   "@iot.selfLink": "?id_link",
+#+   "description": "?desc",
+#+   "name": "?name",
+#+   "properties": {
+#+     "type": "?sensor_type",
+#+     "agentConfidence": "?conf",
 #+     },
+#+   "Datastreams@iot.navigationLink": "?ds_link",
+#+   "HistoricalLocations@iot.navigationLink": "?hl_link",
+#+   "Locations@iot.navigationLink": "?locations_link",
 #+   }
 
 PREFIX iliad-api: <https://w3id.org/iliad/api>
@@ -36,13 +29,14 @@ PREFIX dwc:  <http://rs.tdwg.org/dwc/terms/>
 PREFIX geo: <http://www.opengis.net/ont/geosparql#>
 PREFIX oim-jf:  <http://w3id.org/iliad/oim/jellyfish#>
 
-SELECT DISTINCT (max(?desc_info) AS ?desc) (min(?agent_conf) AS ?conf) ?type ?total ?sensor_type ?name ?enc_type ?id_link ?ds_link ?hl_link ?locations_link ?info ?id
+SELECT DISTINCT (max(?desc_info) AS ?desc) (min(?agent_conf) AS ?conf) ?type ?total ?sensor_type ?name ?enc_type ?id_link ?ds_link ?info ?_id ?id ?hl_link ?locations_link
 WHERE {
     ?s a sosa:Sensor ;
         a ?type ;
         rdfs:label ?desc_info ;
         oim-jf:agentConfidence ?agent_conf .
         FILTER (?type != URI('http://www.w3.org/ns/sosa/Sensor'))
+        FILTER (?s = URI(CONCAT('http://w3id.org/iliad/jellyfish/sensor/', ?_id)))
     BIND ("OGC SensorThings API - Things" AS ?info)
     BIND (STRAFTER(STR(?type), '#') AS ?sensor_type)
     BIND (REPLACE(STR(?s), "^.*/([^/]*)$", "$1") as ?id)
@@ -51,11 +45,4 @@ WHERE {
     BIND (URI(CONCAT('https://w3id.org/iliad/api/v1.0/Things(', ?id,')/Datastreams')) AS ?ds_link)
     BIND (URI(CONCAT('https://w3id.org/iliad/api/v1.0/Things(', ?id,')/HistoricalLocations')) AS ?hl_link)
     BIND (URI(CONCAT('https://w3id.org/iliad/api/v1.0/Things(', ?id,')/Locations')) AS ?locations_link)
-        {
-       SELECT (count(*) as ?total) WHERE { ?x a sosa:Sensor }
-
-    }
-    OPTIONAL { ?s ?p ?_page_integer } 
-    BIND (URI(CONCAT('https://w3id.org/iliad/api/v1.0/Sensors?$top=100&$skip=', (?_page_integer+1)*100)) AS ?next_link)
 }
-ORDER BY ?id

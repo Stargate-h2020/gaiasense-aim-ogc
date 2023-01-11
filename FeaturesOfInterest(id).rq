@@ -4,26 +4,19 @@
 #+ tags:
 #+   - json
 #+ method: GET
-#+ pagination: 100
 #+ endpoint_in_url: False
 #+ transform: {
-#+   "description": "?info",
-#+   "$anchor": "description",
-#+   "@iot.count": "?total",
-#+   "@iot.nextLink": "?next_link",
-#+   "value": {
-#+     "@iot.id": "?id",
-#+     "@iot.selfLink": "?id_link",
-#+     "description": "?desc_info",
-#+     "name": "?name",
-#+     "encodingType": "?enc_type",
-#+     "feature": {
-#+       "coordinates": "?cords$list",
-#+       "type": "?geo_type",
-#+       "distanceFromShore": "?shore_distance",
-#+       },
-#+     "Observations@iot.navigationLink": "?obs_link",
+#+   "@iot.id": "?raw_id",
+#+   "@iot.selfLink": "?id_link",
+#+   "description": "?desc_info",
+#+   "name": "?name",
+#+   "encodingType": "?enc_type",
+#+   "feature": {
+#+     "coordinates": "?cords$list",
+#+     "type": "?geo_type",
+#+     "distanceFromShore": "?shore_distance",
 #+     },
+#+   "Observations@iot.navigationLink": "?obs_link",
 #+   }
 
 PREFIX iliad-api: <https://w3id.org/iliad/api>
@@ -36,7 +29,7 @@ PREFIX dwc:  <http://rs.tdwg.org/dwc/terms/>
 PREFIX geo: <http://www.opengis.net/ont/geosparql#>
 PREFIX oim-jf:  <http://w3id.org/iliad/oim/jellyfish#>
 
-SELECT DISTINCT ?info ?total ?type ?desc_info ?lat ?long ?next_link ?id ?id_link ?name ?obs_link ?enc_type ?cords ?geo_type ?shore_distance
+SELECT DISTINCT ?raw_id ?id_link ?desc_info ?name ?enc_type ?cords ?geo_type ?shore_distance ?obs_link ?_id ?foi_id
 WHERE {
     ?s a sosa:FeatureOfInterest ;
         a ?type ;
@@ -46,19 +39,13 @@ WHERE {
         dwc:locality ?location ;
         oim-jf:distanceFromShore ?shore_distance .
         FILTER (?type != URI('http://www.w3.org/ns/sosa/FeatureOfInterest'))
+        FILTER (?s = URI(CONCAT('http://w3id.org/iliad/jellyfish/feature/', ?_id)))
+    BIND (STR(?_id) AS ?raw_id)
     BIND ("OGC SensorThings API - FeaturesOfInterest" AS ?info)
     BIND (STRAFTER(STR(?type), '#') AS ?geo_type)
     BIND (CONCAT('Location #', ?location) AS ?name)
     BIND (STR('application/vnd.geo+json') AS ?enc_type)
     BIND (CONCAT(?lat, ', ', ?long) AS ?cords)
-    BIND (REPLACE(STR(?s), "^.*/([^/]*)$", "$1") as ?id)
-    BIND (URI(CONCAT('https://w3id.org/iliad/api/v1.0/FeaturesOfInterest(', ?id,')')) AS ?id_link)
-    BIND (URI(CONCAT('https://w3id.org/iliad/api/v1.0/FeaturesOfInterest(', ?id,')/Observations')) AS ?obs_link)
-        {
-       SELECT (count(*) as ?total) WHERE { ?x a sosa:FeatureOfInterest }
-
-    }
-    OPTIONAL { ?s ?p ?_page_integer } 
-    BIND (URI(CONCAT('https://w3id.org/iliad/api/v1.0/FeaturesOfInterest?$top=100&$skip=', (?_page_integer+1)*100)) AS ?next_link)
+    BIND (URI(CONCAT('https://w3id.org/iliad/api/v1.0/FeaturesOfInterest(', ?_id,')')) AS ?id_link)
+    BIND (URI(CONCAT('https://w3id.org/iliad/api/v1.0/FeaturesOfInterest(', ?_id,')/Observations')) AS ?obs_link)
 }
-ORDER BY ?id

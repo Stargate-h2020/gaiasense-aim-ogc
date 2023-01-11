@@ -1,30 +1,22 @@
-#+ summary: Retrieves all the information about ILIAD Locations
+#+ summary: Retrieves all the information about specific ILIAD Location
 #+ description: NOTE! make sure response content type is application/json
 #+ endpoint: https://www.foodie-cloud.org/sparql?default-graph-uri=http://w3id.org/iliad/dataaset/jf-pilot-sample
 #+ tags:
 #+   - json
 #+ method: GET
-#+ pagination: 100
 #+ endpoint_in_url: False
 #+ transform: {
-#+   "description": "?info",
-#+   "$anchor": "description",
-#+   "@iot.count": "?total",
-#+   "@iot.nextLink": "?next_link",
-#+   "value": {
-#+     "@iot.id": "?location",
-#+     "@iot.selfLink": "?id_link",
-#+     "description": "?name",
-#+     "name": "?name",
-#+     "encodingType": "?enc_type",
-#+     "location": {
-#+       "coordinates": "?cords$list",
-#+       "type": "?geo_type",
-#+       },
-#+     "Things@iot.navigationLink": "?things_link",
-#+     "HistoricalLocations@iot.navigationLink": "?hlocs_link",
+#+   "@iot.id": "?location",
+#+   "@iot.selfLink": "?id_link",
+#+   "description": "?name",
+#+   "name": "?name",
+#+   "location": {
+#+     "coordinates": "?cords$list",
+#+     "type": "?geo_type",
 #+     },
-#+   }
+#+   "Things@iot.navigationLink": "?things_link",
+#+   "HistoricalLocations@iot.navigationLink": "?hlocs_link",
+#+ }
 
 PREFIX iliad-api: <https://w3id.org/iliad/api>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
@@ -36,8 +28,7 @@ PREFIX dwc:  <http://rs.tdwg.org/dwc/terms/>
 PREFIX geo: <http://www.opengis.net/ont/geosparql#>
 PREFIX oim-jf:  <http://w3id.org/iliad/oim/jellyfish#>
 
-
-SELECT ?sensor ?info ?enc_type ?name ?things_link ?hlocs_link ?next_link ?total ?geo_type ?cords ?location
+SELECT DISTINCT ?_id ?id_link ?name ?cords ?geo_type ?things_link ?hlocs_link ?location
 WHERE {
     ?s a sosa:FeatureOfInterest ;
         a ?type ;
@@ -46,30 +37,23 @@ WHERE {
         FILTER (?type != URI('http://www.w3.org/ns/sosa/FeatureOfInterest'))
     ?s3 sosa:hasFeatureOfInterest ?s ;
         sosa:resultTime ?res1 ;
-        sosa:madeBySensor ?sensor .
+        sosa:madeBySensor ?location_uri .
+    FILTER (?location_uri = URI(CONCAT('http://w3id.org/iliad/jellyfish/sensor/', ?_id)))    
     FILTER (xsd:dateTime(?res1)=?latest)
     {
-    SELECT ?sensor (max(xsd:dateTime(?res)) as ?latest) 
+    SELECT (max(xsd:dateTime(?res)) as ?latest) 
     WHERE {
     ?s2 a sosa:ObservationCollection ;
         sosa:resultTime ?res ;
-        sosa:madeBySensor ?sensor .
-    } GROUP BY ?sensor
+        sosa:madeBySensor ?location_uri .
+    FILTER (?location_uri = URI(CONCAT('http://w3id.org/iliad/jellyfish/sensor/', ?_id)))    
+    } 
     }
-    BIND ("OGC SensorThings API - Locations" AS ?info)
+    BIND (STR(?_id) AS ?location)
+    BIND (CONCAT('Location #', ?location) AS ?name)
     BIND (CONCAT(?lat, ', ', ?long) AS ?cords)
     BIND (STRAFTER(STR(?type), '#') AS ?geo_type)
-    BIND (STRAFTER(STR(?sensor), '/sensor/') AS ?location)
-    BIND (CONCAT('Location #', ?location) AS ?name)
-    BIND (STR('application/vnd.geo+json') AS ?enc_type)
     BIND (URI(CONCAT('https://w3id.org/iliad/api/v1.0/Locations(', ?location,')')) AS ?id_link)
     BIND (URI(CONCAT('https://w3id.org/iliad/api/v1.0/Locations(', ?location,')/Things')) AS ?things_link)
     BIND (URI(CONCAT('https://w3id.org/iliad/api/v1.0/Locations(', ?location,')/HistoricalLocations')) AS ?hlocs_link)
-            {
-        SELECT (count(*) as ?total) WHERE { ?x a sosa:Sensor }
-
-    }
-    OPTIONAL { ?s ?p ?_page_integer } 
-    BIND (URI(CONCAT('https://w3id.org/iliad/api/v1.0/FeaturesOfInterest?$top=100&$skip=', (?_page_integer+1)*100)) AS ?next_link)
 }
-ORDER BY ?location

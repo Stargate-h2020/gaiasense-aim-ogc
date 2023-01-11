@@ -1,4 +1,4 @@
-#+ summary: Retrieves all the information about ILIAD HistoricalLocations
+#+ summary: Retrieves all the information about ILIAD HistoricalLocations for a specific Location
 #+ description: NOTE! make sure response content type is application/json
 #+ endpoint: https://www.foodie-cloud.org/sparql?default-graph-uri=http://w3id.org/iliad/dataaset/jf-pilot-sample
 #+ tags:
@@ -10,15 +10,14 @@
 #+   "description": "?info",
 #+   "$anchor": "description",
 #+   "@iot.count": "?total",
-#+   "@iot.nextLink": "?next_link",
 #+   "value": {
-#+     "@iot.id": "?location",
-#+     "@iot.selfLink": "?id_link",
-#+     "time": "?time",
-#+     "Locations@iot.navigationLink": "?locations_link",
-#+     "Thing@iot.navigationLink": "?things_link",
+#+      "@iot.id": "?location",
+#+      "@iot.selfLink": "?id_link",
+#+      "time": "?time",
+#+      "Locations@iot.navigationLink": "?locations_link",
+#+      "Thing@iot.navigationLink": "?things_link",
 #+     },
-#+   }
+#+ }
 
 PREFIX iliad-api: <https://w3id.org/iliad/api>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
@@ -31,24 +30,30 @@ PREFIX geo: <http://www.opengis.net/ont/geosparql#>
 PREFIX oim-jf:  <http://w3id.org/iliad/oim/jellyfish#>
 
 
-SELECT ?time ?info ?location ?total ?things_link ?locations_link ?id_link
+SELECT ?time ?info ?location ?things_link ?locations_link ?id_link ?_loc ?total ?info
 WHERE {
     ?s a sosa:ObservationCollection ;
         sosa:madeBySensor ?sens ;
         sosa:resultTime ?res .
     BIND ("OGC SensorThings API - HistoricalLocations" AS ?info)
-    BIND (xsd:dateTime(?res) AS ?time)
     BIND (STRAFTER(STR(?s), '/observation/') AS ?obs_id)
     BIND (STRAFTER(STR(?sens), '/sensor/') AS ?sens_id)
     BIND (CONCAT(?obs_id, '-', ?sens_id) AS ?location)
+    FILTER (?sens_id = ?_loc)
+    BIND ("OGC SensorThings API - HistoricalLocations" AS ?info)
+    BIND (xsd:dateTime(?res) AS ?time)
+                {
+        SELECT (count(*) as ?total) WHERE {
+            SELECT DISTINCT ?x
+            WHERE {
+                ?x a sosa:ObservationCollection ;
+                    sosa:madeBySensor ?sens2 .
+                BIND (STRAFTER(STR(?sens2), '/sensor/') AS ?sens2_id)
+                FILTER (?sens2_id=?_loc)
+            } }
+
+    }
     BIND (URI(CONCAT('https://w3id.org/iliad/api/v1.0/HistoricalLocations(', ?location,')')) AS ?id_link)
     BIND (URI(CONCAT('https://w3id.org/iliad/api/v1.0/HistoricalLocations(', ?location,')/Things')) AS ?things_link)
     BIND (URI(CONCAT('https://w3id.org/iliad/api/v1.0/HistoricalLocations(', ?location,')/Locations')) AS ?locations_link)
-            {
-        SELECT (count(*) as ?total) WHERE { ?x a sosa:ObservationCollection }
-
-    }
-    OPTIONAL { ?s ?p ?_page_integer } 
-    BIND (URI(CONCAT('https://w3id.org/iliad/api/v1.0/FeaturesOfInterest?$top=100&$skip=', (?_page_integer+1)*100)) AS ?next_link)
 }
-ORDER BY ?location
