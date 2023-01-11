@@ -65,6 +65,6 @@ WHERE {
     BIND (URI(CONCAT('https://w3id.org/iliad/api/v1.0/Observations?$top=100&$skip=', xsd:integer(?_page)*100)) AS ?next_link)
     OPTIONAL { ?s ?p ?_top_integer }
     OPTIONAL { ?s ?p ?_skip }
-    BIND (xsd:integer(?_top_integer) as ?topuser)
+    #BIND (xsd:integer(?_top_integer) as ?topuser)
 }
 ORDER BY ?s LIMIT ?_top_integer #OFFSET ?_skip
