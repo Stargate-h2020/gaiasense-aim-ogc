@@ -67,4 +67,4 @@ WHERE {
     OPTIONAL { ?s ?p ?_skip }
     #BIND (xsd:integer(?_top_integer) as ?topuser)
 }
-ORDER BY ?s LIMIT ?_top_integer #OFFSET ?_skip
+ORDER BY ?s #LIMIT ?_top_integer #OFFSET ?_skip
