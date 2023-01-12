@@ -15,7 +15,7 @@
   "$limit": 100,
   "grlc": {
     "summary": "Retrieves all the information about CYBELE datasets as a flat list (information about referenced resources can be retrieved with the /getResource method)",
-    "endpoint": "https://www.foodie-cloud.org/sparql",
+    "endpoint": "http://dbpedia.org/sparql",
     "tags": [ "testbed" ],
     "method": "GET",
     "pagination": 50
