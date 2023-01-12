@@ -2,20 +2,16 @@
   "@context": "http://schema.org/",
   "@graph": [{
     "@type": "City",
-    "@id": "?id",
-    "name": "$rdfs:label$required$bestlang",
-    "image": "$foaf:depiction$required",
-    "containedInPlace": {
-      "@id" : "$dbo:region$required",
-      "name": "$rdfs:label$lang:it"
-    }
+    "@id" : "?id",
+    "name": "$rdfs:label$required$lang:it",
+    "image": "$foaf:depiction$required"
   }],
   "$where": [
     "?id a dbo:City",
     "?id dbo:country dbr:Italy"
   ],
-  "$lang": "en;q=1, it;q=0.7 *;q=0.1",
-  "$limit": 10,
+  "$langTag": "hide",
+  "$limit": 1,
   "$prefixes": {
     "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
     "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
