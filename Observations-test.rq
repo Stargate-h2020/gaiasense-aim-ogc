@@ -62,7 +62,8 @@ WHERE {
 
     }
     OPTIONAL { ?s ?p ?_page } 
-    BIND (URI(CONCAT('https://w3id.org/iliad/api/v1.0/Observations?$top=100&$skip=', xsd:integer(?_page)*100)) AS ?next_link)
+    #BIND (URI(CONCAT('https://w3id.org/iliad/api/v1.0/Observations?$top=100&$skip=', xsd:integer(?_page)*100)) AS ?next_link)
+    BIND (URI(CONCAT('https://w3id.org/iliad/api/v1.0/Observations?$top=',?_top,'&$skip=', ?_skype)) AS ?next_link)
     OPTIONAL { ?s ?p ?_top }
     OPTIONAL { ?s ?p ?_skip }
 }
