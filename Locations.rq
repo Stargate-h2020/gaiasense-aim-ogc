@@ -8,11 +8,11 @@
 #+ endpoint_in_url: False
 #+ transform: {
 #+   "description": "?info",
+#+   "$anchor": "description",
 #+   "@iot.count": "?total",
 #+   "@iot.nextLink": "?next_link",
 #+   "value": {
 #+     "@iot.id": "?location",
-#+     "$anchor": "@iot.id",
 #+     "@iot.selfLink": "?id_link",
 #+     "description": "?name",
 #+     "name": "?name",
