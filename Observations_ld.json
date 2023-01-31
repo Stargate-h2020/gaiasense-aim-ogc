@@ -3,6 +3,7 @@
   "@graph": [{
     "description": "?info",
   	"@iot.count": "?total",
+  	"$anchor": "description",
   	"value": {
     	"@type": "Observation",
     	"@id": "?id",
