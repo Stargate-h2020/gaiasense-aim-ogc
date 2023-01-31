@@ -12,8 +12,7 @@
   }],
   "$where": [
     "?id a dbo:City",
-    "?id dbo:country ?_page",
-    "OPTIONAL { ?s ?p ?_page }"
+    "?id dbo:country dbr:Italy"
   ],
   "$lang": "en;q=1, it;q=0.7 *;q=0.1",
   "$limit": 10,
