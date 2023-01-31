@@ -3,7 +3,6 @@
   "@graph": [{
     "description": "?info",
   	"@iot.count": "?total",
-  	"@iot.nextLink": "?next_link",
   	"value": {
     	"@type": "Observation",
     	"@id": "?id",
@@ -23,8 +22,7 @@
     "BIND ('OGC SensorThings API - Observations' as ?info)",
     "BIND (REPLACE(STR(?s), '^.*/([^/]*)$', '$1') as ?id)",
     "BIND (URI(CONCAT('https://w3id.org/iliad/api/v1.0/Observations(', ?id,')')) AS ?id_link)",
-    "{ SELECT (count(*) as ?total) WHERE { ?x a sosa:Observation }}",
-    "BIND (URI(CONCAT('https://w3id.org/iliad/api/v1.0/Observations?$top=100&$skip=', (xsd:integer(?_page)+1)*100)) AS ?next_link)"
+    "{ SELECT (count(*) as ?total) WHERE { ?x a sosa:Observation }}"
   ],
   "$prefixes": {
     "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
