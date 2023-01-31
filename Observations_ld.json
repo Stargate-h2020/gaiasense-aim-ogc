@@ -29,7 +29,7 @@
     "BIND (REPLACE(STR(?s), '^.*/([^/]*)$', '$1') as ?id)",
     "BIND (URI(CONCAT('https://w3id.org/iliad/api/v1.0/Observations(', ?id,')')) AS ?id_link)",
     "{ SELECT (count(*) as ?total) WHERE { ?x a sosa:Observation }}",
-    "OPTIONAL {?result oim-jf:densityOfJF ?densityOfJF ; oim-jf:quantityOfJF ?quantityOfJF ; dwc:sampleSizeValue ?sampleSizeValue }"
+    "OPTIONAL {?result oim-jf:densityOfJF ?densityOfJF ; oim-jf:quantityOfJF ?quantityOfJF} ; dwc:sampleSizeValue ?sampleSizeValue }"
   ],
   "$orderby":["?id"],
   "$prefixes": {
@@ -37,7 +37,7 @@
     "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
     "dbo": "http://dbpedia.org/ontology/",
     "dbr": "http://dbpedia.org/resource/",
-    "dcat": "http://www.w3.org/ns/dcat#",
+    "dwc": "http://rs.tdwg.org/dwc/terms/",
     "oim-jf": "http://w3id.org/iliad/oim/jellyfish#",
     "sosa": "http://www.w3.org/ns/sosa/"
   },
