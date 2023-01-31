@@ -35,7 +35,7 @@
   },
   "grlc": {
     "summary": "Retrieves all the information about CYBELE datasets as a flat list (information about referenced resources can be retrieved with the /getResource method)",
-    "endpoint": "http://dbpedia.org/sparql",
+    "endpoint": "https://www.foodie-cloud.org/sparql?default-graph-uri=http://w3id.org/iliad/dataaset/jf-pilot-sample",
     "tags": [ "testbed" ],
     "method": "GET",
     "pagination": 100
