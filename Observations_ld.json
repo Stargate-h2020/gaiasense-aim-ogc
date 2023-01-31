@@ -1,0 +1,45 @@
+{
+  "@context": "http://schema.org/",
+  "@graph": [{
+    "description": "?info",
+  	"@iot.count": "?total",
+  	"@iot.nextLink": "?next_link",
+  	"value": {
+    	"@type": "Observation",
+    	"@id": "?id",
+    	"@iot.id": "?id",
+    	"@iot.selfLink": "?id_link",
+    	"phenomenonTime": "?phenomenonTime",
+    	"resultTime": "?resultTime"
+    }
+  }],
+  "$where": [
+    "?col a sosa:ObservationCollection",
+    "?col sosa:resultTime ?resultTime",
+    "?col sosa:phenomenonTime ?phenomenonTime",
+    "?col sosa:hasMember ?s",
+    "?s a sosa:Observation",
+    "?s sosa:hasResult ?result",
+    "BIND ('OGC SensorThings API - Observations' as ?info)",
+    "BIND (REPLACE(STR(?s), '^.*/([^/]*)$', '$1') as ?id)",
+    "BIND (URI(CONCAT('https://w3id.org/iliad/api/v1.0/Observations(', ?id,')')) AS ?id_link)",
+    "{ SELECT (count(*) as ?total) WHERE { ?x a sosa:Observation }}",
+    "BIND (URI(CONCAT('https://w3id.org/iliad/api/v1.0/Observations?$top=100&$skip=', (xsd:integer(?_page)+1)*100)) AS ?next_link)"
+  ],
+  "$prefixes": {
+    "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "dbo": "http://dbpedia.org/ontology/",
+    "dbr": "http://dbpedia.org/resource/",
+    "dcat": "http://www.w3.org/ns/dcat#",
+    "foaf": "http://xmlns.com/foaf/0.1/",
+    "sosa": "http://www.w3.org/ns/sosa/"
+  },
+  "grlc": {
+    "summary": "Retrieves all the information about CYBELE datasets as a flat list (information about referenced resources can be retrieved with the /getResource method)",
+    "endpoint": "http://dbpedia.org/sparql",
+    "tags": [ "testbed" ],
+    "method": "GET",
+    "pagination": 100
+  }
+}
