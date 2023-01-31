@@ -1,5 +1,5 @@
 {
-  "@context": "http://schema.org/",
+  "@context": "https://w3id.org/demeter/agri-context.jsonld",
   "@graph": [{
     "description": "?info",
   	"@iot.count": "?total",
