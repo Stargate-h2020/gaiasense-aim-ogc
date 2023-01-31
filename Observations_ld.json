@@ -10,7 +10,10 @@
     	"@iot.id": "?id",
     	"@iot.selfLink": "?id_link",
     	"phenomenonTime": "?phenomenonTime",
-    	"resultTime": "?resultTime"
+    	"resultTime": "?resultTime",
+    	"result": {
+    		"densityOfJF": "?densityOfJF"
+    	}
     }
   }],
   "$where": [
@@ -23,15 +26,17 @@
     "BIND ('OGC SensorThings API - Observations' as ?info)",
     "BIND (REPLACE(STR(?s), '^.*/([^/]*)$', '$1') as ?id)",
     "BIND (URI(CONCAT('https://w3id.org/iliad/api/v1.0/Observations(', ?id,')')) AS ?id_link)",
-    "{ SELECT (count(*) as ?total) WHERE { ?x a sosa:Observation }}"
+    "{ SELECT (count(*) as ?total) WHERE { ?x a sosa:Observation }}",
+    "OPTIONAL {?result oim-jf:densityOfJF ?densityOfJF}"
   ],
+  "$orderby":["?id"],
   "$prefixes": {
     "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
     "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
     "dbo": "http://dbpedia.org/ontology/",
     "dbr": "http://dbpedia.org/resource/",
     "dcat": "http://www.w3.org/ns/dcat#",
-    "foaf": "http://xmlns.com/foaf/0.1/",
+    "oim-jf": "http://w3id.org/iliad/oim/jellyfish#",
     "sosa": "http://www.w3.org/ns/sosa/"
   },
   "grlc": {
