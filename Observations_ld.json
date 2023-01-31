@@ -3,6 +3,7 @@
   "@graph": [{
     "description": "?info",
   	"@iot.count": "?total",
+  	"@iot.nextLink": "?next_link",
   	"$anchor": "description",
   	"value": {
     	"@type": "Observation",
@@ -33,14 +34,16 @@
     "BIND (REPLACE(STR(?s), '^.*/([^/]*)$', '$1') as ?id)",
     "BIND (URI(CONCAT('https://w3id.org/iliad/api/v1.0/Observations(', ?id,')')) AS ?id_link)",
     "{ SELECT (count(*) as ?total) WHERE { ?x a sosa:Observation }}",
-    "OPTIONAL {?result oim-jf:densityOfJF ?densityOfJF ; oim-jf:quantityOfJF ?quantityOfJF ; dwc:sampleSizeValue ?sampleSizeValue ; oim-jf:wormsConcept ?wormsConcept ; oim-jf:stingByJF ?stingByJF ; oim-jf:beachedJF ?beachedJF }"
+    "OPTIONAL {?result oim-jf:densityOfJF ?densityOfJF ; oim-jf:quantityOfJF ?quantityOfJF ; dwc:sampleSizeValue ?sampleSizeValue ; oim-jf:wormsConcept ?wormsConcept ; oim-jf:stingByJF ?stingByJF ; oim-jf:beachedJF ?beachedJF }",
+    "OPTIONAL { ?s ?p ?_page }",
+    "BIND (URI(CONCAT('https://w3id.org/iliad/api/v1.0/Observations?$top=100&$skip=', (xsd:integer(?_page)+1)*100)) AS ?next_link)"
   ],
   "$orderby":["?id"],
   "$prefixes": {
     "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
     "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
     "dbo": "http://dbpedia.org/ontology/",
-    "dbr": "http://dbpedia.org/resource/",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
     "dwc": "http://rs.tdwg.org/dwc/terms/",
     "oim-jf": "http://w3id.org/iliad/oim/jellyfish#",
     "sosa": "http://www.w3.org/ns/sosa/"
